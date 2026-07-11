@@ -23,9 +23,14 @@ jobs:
     - name: Set up Python
       run: uv python install 3.11
 
+    - name: Create and Activate Virtual Environment
+      run: |
+        uv venv
+        echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+
     - name: Install Project Dependencies
       run: |
-        uv pip install --system pytest-playwright pytest-xdist pytest-html
+        uv pip install pytest-playwright pytest-xdist pytest-html
 
 
     - name: Install All Playwright Browsers & OS Dependencies
