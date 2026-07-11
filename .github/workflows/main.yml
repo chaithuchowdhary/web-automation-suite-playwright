@@ -1,0 +1,43 @@
+name: Parallel Playwright Pytest CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Set up Python
+      run: uv python install 3.11
+
+    - name: Install Project Dependencies
+      run: |
+        uv pip install pytest-playwright pytest-xdist pytest-html
+
+    - name: Install All Playwright Browsers & OS Dependencies
+      run: uv run playwright install chromium firefox webkit --with-deps
+
+    - name: Run Tests in Parallel Across All Browsers
+      run: |
+        uv run pytest -n auto --browser chromium --browser firefox --browser webkit --html=report.html --self-contained-html
+
+    - name: Upload Test Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: parallel-playwright-report
+        path: report.html
+        retention-days: 30
