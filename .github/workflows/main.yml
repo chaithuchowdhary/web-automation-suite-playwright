@@ -25,7 +25,8 @@ jobs:
 
     - name: Install Project Dependencies
       run: |
-        uv pip install pytest-playwright pytest-xdist pytest-html
+        uv pip install --system pytest-playwright pytest-xdist pytest-html
+
 
     - name: Install All Playwright Browsers & OS Dependencies
       run: uv run playwright install chromium firefox webkit --with-deps
