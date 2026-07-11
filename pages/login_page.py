@@ -1,4 +1,4 @@
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, expect
 
 from pages.base_page import BasePage
 
@@ -30,7 +30,13 @@ class LoginPage(BasePage):
         return self
 
     def is_logged_in(self) -> bool:
-        return self.logged_in_as.is_visible()
+        # Clicking login navigates, so an immediate is_visible() check can run
+        # against the old page and report False. Wait for the banner instead.
+        try:
+            self.logged_in_as.wait_for(state="visible")
+            return True
+        except PlaywrightTimeoutError:
+            return False
 
     def expect_login_error(self):
         expect(self.error_message).to_be_visible()

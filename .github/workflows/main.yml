@@ -21,22 +21,26 @@ jobs:
         enable-cache: true
 
     - name: Set up Python
-      run: uv python install 3.11
-
-    - name: Create and Activate Virtual Environment
-      run: |
-        uv venv
-        echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+      run: uv python install 3.12
 
     - name: Install Project Dependencies
-      run: |
-        uv pip install pytest-playwright pytest-xdist pytest-html
-
+      run: uv sync
 
     - name: Install All Playwright Browsers & OS Dependencies
       run: uv run playwright install chromium firefox webkit --with-deps
 
+    # Each value is taken from a repository secret if one exists, otherwise from
+    # a repository variable. Keep PASSWORD (and ideally the card fields) as
+    # secrets - variables are not masked in the workflow logs.
     - name: Run Tests in Parallel Across All Browsers
+      env:
+        EMAIL: ${{ secrets.EMAIL || vars.EMAIL }}
+        PASSWORD: ${{ secrets.PASSWORD || vars.PASSWORD }}
+        CARD_NAME: ${{ secrets.CARD_NAME || vars.CARD_NAME }}
+        CARD_NUMBER: ${{ secrets.CARD_NUMBER || vars.CARD_NUMBER }}
+        CARD_CVC: ${{ secrets.CARD_CVC || vars.CARD_CVC }}
+        CARD_EXPIRY_MONTH: ${{ secrets.CARD_EXPIRY_MONTH || vars.CARD_EXPIRY_MONTH }}
+        CARD_EXPIRY_YEAR: ${{ secrets.CARD_EXPIRY_YEAR || vars.CARD_EXPIRY_YEAR }}
       run: |
         uv run pytest -n auto --browser chromium --browser firefox --browser webkit --html=report.html --self-contained-html
 

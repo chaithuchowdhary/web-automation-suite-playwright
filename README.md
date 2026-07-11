@@ -15,7 +15,7 @@ built with Playwright, Python and Pytest using the Page Object Model.
 ```
 pages/            Page Object Model classes (BasePage, LoginPage, ProductsPage, CartPage, CheckoutPage)
 tests/            Test suites + conftest.py (shared page-object fixtures)
-testdata/         Test data (credentials.py is git-ignored; credentials_example.py is the template)
+testdata/         credentials.py - reads EMAIL/PASSWORD/CARD_* from the environment
 reports/          Reserved for HTML/other custom test reports
 pytest.ini        base_url, failure-only screenshot/trace/video, xdist grouping
 ```
@@ -23,20 +23,30 @@ pytest.ini        base_url, failure-only screenshot/trace/video, xdist grouping
 ## Setup
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install playwright pytest-playwright pytest-xdist
-playwright install chromium firefox webkit
+uv sync
+uv run playwright install chromium firefox webkit
 ```
 
-Copy the credentials template and fill in a real, already-registered
-automationexercise.com account plus dummy card details:
+Credentials come from environment variables. Locally, copy the template and fill
+in a real, already-registered automationexercise.com account plus dummy card details:
 
 ```bash
-cp testdata/credentials_example.py testdata/credentials.py
+cp .env.example .env
 ```
 
-`testdata/credentials.py` is git-ignored so personal credentials never get committed.
+`.env` is git-ignored, so personal credentials never get committed. Real environment
+variables take precedence over `.env`.
+
+## CI
+
+`.github/workflows/main.yml` runs the suite on every push to `main`/`master`. It reads
+each credential from a repository **secret** of the same name, falling back to a
+repository **variable** if no secret is set (Settings → Secrets and variables → Actions):
+
+`EMAIL`, `PASSWORD`, `CARD_NAME`, `CARD_NUMBER`, `CARD_CVC`, `CARD_EXPIRY_MONTH`, `CARD_EXPIRY_YEAR`
+
+Keep `PASSWORD` and the card fields as secrets — variables are not masked in workflow logs.
+If any are missing, the run fails immediately with a message naming the missing variable.
 
 ## What the tests cover
 

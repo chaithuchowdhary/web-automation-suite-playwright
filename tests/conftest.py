@@ -5,13 +5,8 @@ from pages.checkout_page import CheckoutPage
 from pages.login_page import LoginPage
 from pages.products_page import ProductsPage
 
-try:
-    from testdata.credentials import EMAIL, PASSWORD
-    
-except ModuleNotFoundError:
-    EMAIL = os.getenv("EMAIL")
-    PASSWORD = os.getenv("PASSWORD")
-    
+from testdata.credentials import EMAIL, PASSWORD
+
 # Real ad/analytics domains observed live on automationexercise.com. Google's
 # full-page "vignette" interstitial (loaded from these domains) can cover the
 # checkout/payment form and block every locator on the page, so these are
@@ -58,7 +53,7 @@ def checkout_page(page):
 
 @pytest.fixture
 def logged_in_page(page, login_page):
-    """A page already authenticated with the credentials in testdata/credentials.py."""
+    """A page already authenticated with the credentials from the environment."""
     login_page.open()
     login_page.login(EMAIL, PASSWORD)
     return page
